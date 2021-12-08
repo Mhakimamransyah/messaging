@@ -5,8 +5,14 @@ import (
 	"fmt"
 	"log"
 	Api "messaging/api"
+	ControllersChats "messaging/api/v1/controllers/chats"
+	ControllersUsers "messaging/api/v1/controllers/users"
+	ServiceChats "messaging/business/chats"
+	ServiceUsers "messaging/business/users"
 	"messaging/config"
 	"messaging/migrations"
+	RepositoryChats "messaging/repositories/chats"
+	RepositoryUsers "messaging/repositories/users"
 	"os"
 	"os/signal"
 	"strconv"
@@ -25,8 +31,6 @@ func initDatabaseMysql(appconfig *config.AppConfig) *gorm.DB {
 		"DB_Host":     appconfig.DbHost,
 		"DB_Name":     appconfig.DbName,
 	}
-	fmt.Println(configDB)
-
 	connectionString := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=True&loc=Local",
 		configDB["DB_Username"],
 		configDB["DB_Password"],
@@ -45,11 +49,19 @@ func initDatabaseMysql(appconfig *config.AppConfig) *gorm.DB {
 
 func main() {
 	config := config.GetConfig()
-	// db := initDatabaseMysql(config)
+	db := initDatabaseMysql(config)
+
+	userRepository := RepositoryUsers.InitRepository(db)
+	userService := ServiceUsers.InitUserService(userRepository)
+	userController := ControllersUsers.InitUserController(userService)
+
+	chatsRepository := RepositoryChats.InitRepository(db)
+	chatsService := ServiceChats.InitChatService(chatsRepository)
+	chatsController := ControllersChats.InitChatsController(chatsService)
 
 	e := echo.New()
 
-	Api.RegisterPath(e)
+	Api.RegisterPath(e, userController, chatsController)
 
 	go func() {
 		address := fmt.Sprintf(":%d", config.AppPort)

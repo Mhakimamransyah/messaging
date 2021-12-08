@@ -44,7 +44,7 @@ func NewSuccessResponse(data interface{}) (int, SuccessResponse) {
 //NewSuccessResponse create new success payload
 func NewSuccessCreated() (int, SuccessResponse) {
 	return http.StatusCreated, SuccessResponse{
-		"Success",
+		"Success, Data created",
 		map[string]interface{}{},
 	}
 }
