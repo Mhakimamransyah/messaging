@@ -90,6 +90,7 @@ func (service *ChatService) ReadChat(id_users, id_groups int) ([]*ReadList, erro
 	for _, data := range res {
 		read := ReadList{
 			ID:           data.ID,
+			Date:         data.CreatedAt,
 			Type_chat:    GetType(id_users, data),
 			Replies_chat: RepliesChat(data, res, id_users),
 			Messages:     data.Messages,

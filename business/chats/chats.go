@@ -32,6 +32,7 @@ type ReadList struct {
 	Replies_chat *ReadList `json:"replies_from_chat"`
 	IsRead       int       `json:"is_read"`
 	Messages     string    `json:"messages"`
+	Date         time.Time `json:"send_at"`
 }
 
 func GetType(id_user int, chat *Chats) string {
@@ -48,6 +49,7 @@ func RepliesChat(chat *Chats, list_chat []*Chats, id_user int) *ReadList {
 		for _, data := range list_chat {
 			if data.ID == chat.Replies_id_chat {
 				replies.ID = data.ID
+				replies.Date = data.CreatedAt
 				replies.Type_chat = GetType(id_user, chat)
 				replies.IsRead = data.IsRead
 				replies.Messages = data.Messages

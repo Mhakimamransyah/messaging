@@ -128,7 +128,7 @@ func (repos *ChatRepository) GetChatDetail(id_users, id_group int) ([]*chats.Cha
 func (repos *ChatRepository) GetChatsGroup(id_user int) ([]*chats.Chats, error) {
 	// GET , GROUP AND ORDER ID GROUP
 	chats_table_group := []ChatsTable{}
-	err := repos.DB.Where("from_id_users = ? OR to_id_users = ?", id_user, id_user).Order("id_group desc").Group("id_group").Find(&chats_table_group).Error
+	err := repos.DB.Where("from_id_users = ? OR to_id_users = ?", id_user, id_user).Order("created_at desc").Group("id_group").Find(&chats_table_group).Error
 	if err != nil {
 		return nil, err
 	}
