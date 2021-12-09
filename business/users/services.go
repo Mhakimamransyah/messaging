@@ -36,10 +36,6 @@ func (service *UserService) RegistersNewUser(users *UsersSpec) error {
 	return nil
 }
 
-func (service *UserService) Login(username, password string) (*Users, error) {
-	return nil, nil
-}
-
 func (service *UserService) GetUser(username string) (*Users, error) {
 	res, err := service.User_repo.Get(username)
 	if err != nil {
@@ -47,12 +43,4 @@ func (service *UserService) GetUser(username string) (*Users, error) {
 		return nil, business.ErrInvalidRequest
 	}
 	return res, nil
-}
-
-func (service *UserService) RemoveUser(username string) error {
-	return nil
-}
-
-func (service *UserService) ModifyUser(user *UsersSpec) error {
-	return nil
 }

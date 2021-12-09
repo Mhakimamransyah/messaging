@@ -3,8 +3,6 @@ package users
 type Services interface {
 	RegistersNewUser(users *UsersSpec) error
 	GetUser(username string) (*Users, error)
-	RemoveUser(username string) error
-	ModifyUser(user *UsersSpec) error
 }
 
 type Repository interface {
