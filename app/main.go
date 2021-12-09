@@ -24,6 +24,7 @@ import (
 )
 
 func initDatabaseMysql(appconfig *config.AppConfig) *gorm.DB {
+	fmt.Println(appconfig)
 	configDB := map[string]string{
 		"DB_Username": appconfig.DbUsername,
 		"DB_Password": appconfig.DbPassword,
