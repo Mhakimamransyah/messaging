@@ -86,6 +86,16 @@ func (repo *UsersRepository) Get(username string) (*users.Users, error) {
 	}
 	return ConvertUserTablesToUsers(&user_table), nil
 }
+
+func (repo *UsersRepository) GetUserById(id_user int) (*users.Users, error) {
+	user_table := UsersTable{}
+	err := repo.DB.Where("id = ?", id_user).First(&user_table).Error
+	if err != nil {
+		return nil, err
+	}
+	return ConvertUserTablesToUsers(&user_table), nil
+}
+
 func (repo *UsersRepository) Update(user *users.Users) error {
 	return nil
 }

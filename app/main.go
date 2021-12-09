@@ -56,7 +56,7 @@ func main() {
 	userController := ControllersUsers.InitUserController(userService)
 
 	chatsRepository := RepositoryChats.InitRepository(db)
-	chatsService := ServiceChats.InitChatService(chatsRepository)
+	chatsService := ServiceChats.InitChatService(chatsRepository, userRepository)
 	chatsController := ControllersChats.InitChatsController(chatsService)
 
 	e := echo.New()

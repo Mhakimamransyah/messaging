@@ -2,6 +2,7 @@ package chats
 
 import (
 	"fmt"
+	"log"
 	"messaging/business/chats"
 	"messaging/repositories/users"
 	"time"
@@ -49,6 +50,21 @@ func ConvertChatsToChatsTables(chat *chats.Chats) *ChatsTable {
 	}
 }
 
+func ConvertChatsTableToChats(chat *ChatsTable) *chats.Chats {
+	return &chats.Chats{
+		ID:              chat.ID,
+		From_id_users:   chat.From_id_users,
+		To_id_users:     chat.To_id_users,
+		Replies_id_chat: chat.Replies_id_chat,
+		IDGroup:         chat.IDGroup,
+		IsRead:          chat.IsRead,
+		Messages:        chat.Messages,
+		CreatedAt:       chat.CreatedAt,
+		UpdatedAt:       chat.UpdatedAt,
+		DeletedAt:       chat.DeletedAt,
+	}
+}
+
 type Tabler interface {
 	TableName() string
 }
@@ -77,10 +93,57 @@ func (repos *ChatRepository) CreateChats(chats *chats.Chats) error {
 	return nil
 }
 
-func (repos *ChatRepository) GetListChats(id_users int) ([]*chats.Chats, error) {
-	return nil, nil
+func (repos *ChatRepository) UpdateRead(id_users, id_group int) error {
+	chat_tables := []ChatsTable{}
+	err := repos.DB.Model(&chat_tables).Where("id_group = ? AND to_id_users = ?", id_group, id_users).Update("is_read", 1).Error
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (repos *ChatRepository) GetChatDetail(id_users, id_group int) ([]*chats.Chats, error) {
-	return nil, nil
+	chats_table_group := []ChatsTable{}
+	err := repos.DB.Where("id_group = ?", id_group).Order("chats.created_at asc").Find(&chats_table_group).Error
+	if err != nil {
+		log.Printf("%s", err)
+	}
+
+	var list_chat []*chats.Chats
+	for i, _ := range chats_table_group {
+		chat := ConvertChatsTableToChats(&chats_table_group[i])
+		list_chat = append(list_chat, chat)
+	}
+	return list_chat, nil
+}
+
+func (repos *ChatRepository) GetChatsGroup(id_user int) ([]*chats.Chats, error) {
+	// GET , GROUP AND ORDER ID GROUP
+	chats_table_group := []ChatsTable{}
+	err := repos.DB.Where("from_id_users = ? OR to_id_users = ?", id_user, id_user).Order("id_group desc").Group("id_group").Find(&chats_table_group).Error
+	if err != nil {
+		return nil, err
+	}
+
+	// GET AND ORDER LAST CHAT MESSAGE
+	chats_group := []ChatsTable{}
+	for _, group := range chats_table_group {
+		var chat_group_ ChatsTable
+		repos.DB.Where("id_group = ?", group.IDGroup).Order("chats.created_at desc").First(&chat_group_)
+		chats_group = append(chats_group, chat_group_)
+	}
+
+	// CONVERT AND SEND
+	var list_chat []*chats.Chats
+	for i, _ := range chats_group {
+		chat := ConvertChatsTableToChats(&chats_group[i])
+		list_chat = append(list_chat, chat)
+	}
+	return list_chat, nil
+}
+
+func (repos *ChatRepository) CountUnread(id_users, id_group int) int {
+	chats_table_group := []ChatsTable{}
+	repos.DB.Where("id_group = ? AND to_id_users = ? AND is_read = ?", id_group, id_users, 0).Find(&chats_table_group)
+	return len(chats_table_group)
 }

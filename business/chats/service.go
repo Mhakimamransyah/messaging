@@ -3,6 +3,7 @@ package chats
 import (
 	"log"
 	"messaging/business"
+	"messaging/business/users"
 	"messaging/util/validator"
 )
 
@@ -16,11 +17,13 @@ type ChatsSpec struct {
 
 type ChatService struct {
 	Chats_repo Repository
+	User_repo  users.Repository
 }
 
-func InitChatService(repository Repository) *ChatService {
+func InitChatService(repository Repository, repo_user users.Repository) *ChatService {
 	return &ChatService{
 		Chats_repo: repository,
+		User_repo:  repo_user,
 	}
 }
 
@@ -38,10 +41,64 @@ func (service *ChatService) SendMessage(chat_specs ChatsSpec) error {
 	return nil
 }
 
-func (service *ChatService) ListChat(id_users int) ([]*Chats, error) {
-	return nil, nil
+func (service *ChatService) ListChat(id_users int) ([]*ChatsList, error) {
+	res, err := service.Chats_repo.GetChatsGroup(id_users)
+	if err != nil {
+		log.Printf("%s", err.Error())
+		return nil, business.ErrInvalidRequest
+	}
+	var chatList []*ChatsList
+	for key, _ := range res {
+		value := **&res[key]
+		user := users.Users{}
+		if value.From_id_users == id_users {
+			// gunakan to_id sebagai profile lawan chat
+			tmp_user, err := service.User_repo.GetUserById(value.To_id_users)
+			if err != nil {
+				return nil, business.ErrInternalServerError
+			}
+			user = *tmp_user
+		} else {
+			// gunakan from_id sebagai profile lawan chat
+			tmp_user, err := service.User_repo.GetUserById(value.From_id_users)
+			if err != nil {
+				return nil, business.ErrInternalServerError
+			}
+			user = *tmp_user
+		}
+		_chatList := ChatsList{
+			IDGroup:        value.IDGroup,
+			Chat_list_name: user.Name,
+			Last_messages:  value.Messages,
+			Unread:         service.Chats_repo.CountUnread(id_users, value.IDGroup),
+		}
+		chatList = append(chatList, &_chatList)
+	}
+	return chatList, nil
 }
 
-func (service *ChatService) ReadChat(id_users, id_groups int) ([]*Chats, error) {
-	return nil, nil
+func (service *ChatService) ReadChat(id_users, id_groups int) ([]*ReadList, error) {
+	res, err := service.Chats_repo.GetChatDetail(id_users, id_groups)
+	if err != nil {
+		log.Printf("%s", err)
+		return nil, business.ErrInvalidRequest
+	}
+
+	var list_chat_read []*ReadList
+	for _, data := range res {
+		read := ReadList{
+			ID:           data.ID,
+			Type_chat:    GetType(id_users, data),
+			Replies_chat: RepliesChat(data, res, id_users),
+			Messages:     data.Messages,
+			IsRead:       data.IsRead,
+		}
+		list_chat_read = append(list_chat_read, &read)
+	}
+
+	err = service.Chats_repo.UpdateRead(id_users, id_groups)
+	if err != nil {
+		log.Printf("%s", err)
+	}
+	return list_chat_read, nil
 }

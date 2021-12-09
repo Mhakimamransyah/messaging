@@ -16,8 +16,8 @@ func RegisterPath(e *echo.Echo, user_controller *ControllersUsers.UsersControlle
 
 	chats := e.Group("v1/chats")
 	chats.POST("", chat_controller.SendMessagesController)
-	chats.GET("/:id_users", chat_controller.ListChatController)
-	chats.GET("/:id_users/read/:id_group", chat_controller.ReadChatController)
+	chats.GET("/:id_user", chat_controller.ListChatController)
+	chats.GET("/:id_user/read/:id_group", chat_controller.ReadChatController)
 
 	e.GET("/", func(c echo.Context) error {
 		return c.JSON(http.StatusOK, map[string]interface{}{
