@@ -80,7 +80,7 @@ func (repos *ChatRepository) CreateChats(chats *chats.Chats) (error, interface{}
 
 	if chatsTable.IDGroup > 0 {
 		// already chatting before
-		err := repos.DB.Save(&chatsTable).Error
+		err := repos.DB.Save(chatsTable).Error
 		if err != nil {
 			return err, nil
 		}

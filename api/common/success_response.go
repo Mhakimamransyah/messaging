@@ -54,10 +54,10 @@ func NewSuccessCreated() (int, SuccessResponse) {
 	}
 }
 
-func ChatCreated(response interface{}) (int, SuccessResponse) {
+func ChatCreated() (int, SuccessResponse) {
 	return http.StatusCreated, SuccessResponse{
 		"Success, Chat send",
-		response,
+		map[string]interface{}{},
 	}
 }
 

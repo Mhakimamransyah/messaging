@@ -21,11 +21,11 @@ func InitChatsController(service chats.Service) *ChatsController {
 func (controller *ChatsController) SendMessagesController(c echo.Context) error {
 	specs := chats.ChatsSpec{}
 	c.Bind(&specs)
-	err, res := controller.Chats_service.SendMessage(specs)
+	err, _ := controller.Chats_service.SendMessage(specs)
 	if err != nil {
 		return c.JSON(common.NewBadRequestResponseWithMessage(err.Error()))
 	}
-	return c.JSON(common.ChatCreated(res))
+	return c.JSON(common.ChatCreated())
 }
 
 func (controller *ChatsController) ListChatController(c echo.Context) error {
