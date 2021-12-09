@@ -20,6 +20,8 @@ type Chats struct {
 type ChatsList struct {
 	IDGroup        int    `json:"id_group"`
 	Chat_list_name string `json:"name"`
+	Phone          string `json:"phone"`
+	Username       string `json:"username"`
 	Last_messages  string `json:"messages"`
 	Unread         int    `json:"unread_messages"`
 }

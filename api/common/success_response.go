@@ -17,6 +17,11 @@ type SuccessResponse struct {
 	Data    interface{} `json:"data"`
 }
 
+type SuccessResponseSendChat struct {
+	Message string      `json:"message"`
+	Data    interface{} `json:"data"`
+}
+
 type SuccessGetData struct {
 	Message string      `json:"message"`
 	Count   int         `json:"total"`
@@ -46,6 +51,13 @@ func NewSuccessCreated() (int, SuccessResponse) {
 	return http.StatusCreated, SuccessResponse{
 		"Success, Data created",
 		map[string]interface{}{},
+	}
+}
+
+func ChatCreated(response interface{}) (int, SuccessResponse) {
+	return http.StatusCreated, SuccessResponse{
+		"Success, Chat send",
+		response,
 	}
 }
 

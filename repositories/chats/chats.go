@@ -23,7 +23,7 @@ func InitRepository(DB *gorm.DB) *ChatRepository {
 type ChatsTable struct {
 	gorm.Model
 	ID              int              `gorm:"id;primaryKey:autoIncrement;unique"`
-	IDGroup         int              `gorm:"id_group;id;"`
+	IDGroup         int              `gorm:"id_group;id;default:0"`
 	From_id_users   int              `gorm:"from_id_users;not null;"`
 	To_id_users     int              `gorm:"to_id_users;"`
 	Replies_id_chat int              `gorm:"replies_id_chat"`
@@ -73,24 +73,32 @@ func (ChatsTable) TableName() string {
 	return "chats"
 }
 
-func (repos *ChatRepository) CreateChats(chats *chats.Chats) error {
+func (repos *ChatRepository) CreateChats(chats *chats.Chats) (error, interface{}) {
+
 	chatsTable := ConvertChatsToChatsTables(chats)
+	var id_group interface{}
+
 	if chatsTable.IDGroup > 0 {
 		// already chatting before
-		err := repos.DB.Save(chatsTable).Error
+		err := repos.DB.Save(&chatsTable).Error
 		if err != nil {
-			return err
+			return err, nil
 		}
+		id_group = chatsTable.IDGroup
 	} else {
 		// first time chatting
-		query := fmt.Sprintf("INSERT INTO chats( id_group, from_id_users, to_id_users,messages,replies_id_chat) SELECT MAX( id_group )+1,%d,%d,'%s',%d FROM chats", chatsTable.From_id_users, chatsTable.To_id_users,
+
+		query := fmt.Sprintf("INSERT INTO chats( id_group, from_id_users, to_id_users,messages,replies_id_chat, created_at) SELECT COALESCE(MAX(id_group), 0) + 1,%d,%d,'%s',%d, NOW() FROM chats", chatsTable.From_id_users, chatsTable.To_id_users,
 			chats.Messages, chatsTable.Replies_id_chat)
-		err := repos.DB.Exec(query).Error
-		if err != nil {
-			return err
+		res := repos.DB.Exec(query).Model(&chatsTable)
+		if res.Error != nil {
+			return res.Error, nil
 		}
+		id_group = chatsTable.IDGroup
 	}
-	return nil
+	res := make(map[string]interface{})
+	res["id_group"] = id_group
+	return nil, res
 }
 
 func (repos *ChatRepository) UpdateRead(id_users, id_group int) error {

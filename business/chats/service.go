@@ -27,18 +27,18 @@ func InitChatService(repository Repository, repo_user users.Repository) *ChatSer
 	}
 }
 
-func (service *ChatService) SendMessage(chat_specs ChatsSpec) error {
+func (service *ChatService) SendMessage(chat_specs ChatsSpec) (error, interface{}) {
 	err := validator.GetValidator().Struct(chat_specs)
 	if err != nil {
-		return business.ErrInvalidSpec
+		return business.ErrInvalidSpec, nil
 	}
 	chats := NewChats(&chat_specs)
-	err = service.Chats_repo.CreateChats(chats)
+	err, res := service.Chats_repo.CreateChats(chats)
 	if err != nil {
 		log.Printf("%s", err.Error())
-		return business.ErrInvalidRequest
+		return business.ErrInvalidRequest, nil
 	}
-	return nil
+	return nil, res
 }
 
 func (service *ChatService) ListChat(id_users int) ([]*ChatsList, error) {
@@ -69,6 +69,8 @@ func (service *ChatService) ListChat(id_users int) ([]*ChatsList, error) {
 		_chatList := ChatsList{
 			IDGroup:        value.IDGroup,
 			Chat_list_name: user.Name,
+			Phone:          user.Phone,
+			Username:       user.Username,
 			Last_messages:  value.Messages,
 			Unread:         service.Chats_repo.CountUnread(id_users, value.IDGroup),
 		}

@@ -1,0 +1,72 @@
+name: CI / CD 
+
+on: 
+   push:
+     branches:
+       - 'master'
+jobs:
+   
+   jobs-1:
+     name: run unit test
+     runs-on: ubuntu-18.04
+     steps:
+     - uses: actions/checkout@v2
+     - name: setup-golang
+       uses: actions/setup-go@v2
+       with:
+         go-verison: 1.16
+     - name: running-unit-test
+       run: go test ./... -cover
+   
+   jobs-2:
+      name: build image and push to docker hub
+      runs-on: ubuntu-18.04
+      needs: jobs-1 
+      steps:
+        - uses: actions/checkout@v2
+        - name: generate config file
+          env:
+            CONFIG: ${{secrets.CONFIG_APP}}
+          run: |
+            echo "$CONFIG" > ./config/.env 
+        - name: build image
+          run: docker build -t mhakim/messaging:1.0 .
+        - name: login to docker hub
+          uses: docker/login-action@v1
+          with: 
+            username: ${{secrets.DOCKER_USERNAME}}
+            password: ${{secrets.DOCKER_PASSWORD}}
+        - name: push to docker hub
+          run: docker push mhakim/messaging:1.0
+
+   jobs-3:
+    name: Deploy to server
+    runs-on: ubuntu-18.04
+    needs: jobs-2
+    steps:
+      - name: setup server
+        uses: appleboy/ssh-action@master
+        with:
+          username: ${{secrets.USERNAME}}
+          password: ${{secrets.PASSWORD}}
+          host: ${{secrets.HOST}}
+          port: ${{secrets.PORT}}
+          sync: false
+          script_stop: true
+          script: |  
+            docker images
+            docker container ps -a
+            docker stop messaging_apps 
+            docker pull mhakim/messaging:1.0
+            docker rm messaging_apps
+            docker run -d -p 8005:8005 --name messaging_apps mhakim/messaging:1.0
+            sleep 5s
+            docker images
+            docker container ps -a 
+            echo "\n\n=========================== APPLICATION STATUS =============================\n" 
+            docker logs messaging_apps
+     
+
+
+          
+   
