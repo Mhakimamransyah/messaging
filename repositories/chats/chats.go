@@ -5,6 +5,7 @@ import (
 	"log"
 	"messaging/business/chats"
 	"messaging/repositories/users"
+	"sort"
 	"time"
 
 	"gorm.io/gorm"
@@ -132,6 +133,10 @@ func (repos *ChatRepository) GetChatsGroup(id_user int) ([]*chats.Chats, error) 
 	if err != nil {
 		return nil, err
 	}
+
+	sort.Slice(chats_table_group, func(i, j int) bool {
+		return chats_table_group[i].CreatedAt.After(chats_table_group[j].CreatedAt)
+	})
 
 	// GET AND ORDER LAST CHAT MESSAGE
 	chats_group := []ChatsTable{}

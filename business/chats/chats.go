@@ -50,7 +50,7 @@ func RepliesChat(chat *Chats, list_chat []*Chats, id_user int) *ReadList {
 			if data.ID == chat.Replies_id_chat {
 				replies.ID = data.ID
 				replies.Date = data.CreatedAt
-				replies.Type_chat = GetType(id_user, chat)
+				replies.Type_chat = GetType(id_user, data)
 				replies.IsRead = data.IsRead
 				replies.Messages = data.Messages
 				break
