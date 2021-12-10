@@ -21,6 +21,11 @@ jobs:
        run: go test ./... -coverprofile outfile .
      - name: build output coverage file
        run: go tool cover -html=outfile -o cover.html
+     - name: Sonar Cloud
+       uses: sonarsource/sonarcloud-github-action@master
+       env:
+        GITHUB_TOKEN: ${{ secrets.TOKEN }}
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
    
    jobs-2:
       name: build image and push to docker hub
