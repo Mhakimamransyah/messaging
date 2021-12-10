@@ -17,6 +17,10 @@ jobs:
        uses: actions/setup-go@v2
        with:
          go-verison: 1.16
+     - name: build cover
+       run: go test ./... -cover
+     - name: build profile
+       run: go test ./... -coverprofile outfile .
      - name: Sonar Cloud Scan
        uses: sonarsource/sonarcloud-github-action@master
        env:
