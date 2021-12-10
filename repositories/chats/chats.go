@@ -82,12 +82,15 @@ func (repos *ChatRepository) CreateChats(chats *chats.Chats) (error, interface{}
 		// already chatting before
 
 		// if replies, check if replies id exist
-		replied_to_chat := ChatsTable{}
-		err := repos.DB.Where("id = ?", chats.ID).First(&replied_to_chat).Error
-		if err != nil {
-			return err, nil
+		if chats.ID != 0 {
+			replied_to_chat := ChatsTable{}
+			err := repos.DB.Where("id = ?", chats.ID).First(&replied_to_chat).Error
+			if err != nil {
+				return err, nil
+			}
 		}
-		err = repos.DB.Save(chatsTable).Error
+
+		err := repos.DB.Save(chatsTable).Error
 		if err != nil {
 			return err, nil
 		}
