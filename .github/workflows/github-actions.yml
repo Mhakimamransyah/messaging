@@ -15,8 +15,12 @@ jobs:
        uses: actions/setup-go@v2
        with:
          go-verison: 1.16
-     - name: running-unit-test
+     - name: build cover
        run: go test ./... -cover
+     - name: build profile
+       run: go test ./... -coverprofile outfile .
+     - name: build output coverage file
+       run: go tool cover -html=outfile -o cover.html
    
    jobs-2:
       name: build image and push to docker hub

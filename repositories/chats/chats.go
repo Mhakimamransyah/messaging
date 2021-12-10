@@ -5,7 +5,6 @@ import (
 	"log"
 	"messaging/business/chats"
 	"messaging/repositories/users"
-	"sort"
 	"time"
 
 	"gorm.io/gorm"
@@ -81,7 +80,14 @@ func (repos *ChatRepository) CreateChats(chats *chats.Chats) (error, interface{}
 
 	if chatsTable.IDGroup > 0 {
 		// already chatting before
-		err := repos.DB.Save(chatsTable).Error
+
+		// if replies, check if replies id exist
+		replied_to_chat := ChatsTable{}
+		err := repos.DB.Where("id = ?", chats.ID).First(&replied_to_chat).Error
+		if err != nil {
+			return err, nil
+		}
+		err = repos.DB.Save(chatsTable).Error
 		if err != nil {
 			return err, nil
 		}
@@ -129,18 +135,33 @@ func (repos *ChatRepository) GetChatDetail(id_users, id_group int) ([]*chats.Cha
 func (repos *ChatRepository) GetChatsGroup(id_user int) ([]*chats.Chats, error) {
 	// GET , GROUP AND ORDER ID GROUP
 	chats_table_group := []ChatsTable{}
-	err := repos.DB.Where("from_id_users = ? OR to_id_users = ?", id_user, id_user).Order("created_at desc").Group("id_group").Find(&chats_table_group).Error
+	err := repos.DB.Where("from_id_users = ? OR to_id_users = ?", id_user, id_user).Order("created_at desc").Find(&chats_table_group).Error
 	if err != nil {
 		return nil, err
 	}
 
-	sort.Slice(chats_table_group, func(i, j int) bool {
-		return chats_table_group[i].CreatedAt.After(chats_table_group[j].CreatedAt)
-	})
+	// GROUP HERE
+	unique_group := []ChatsTable{}
+	for key, data := range chats_table_group {
+		if key == 0 {
+			unique_group = append(unique_group, data)
+		} else {
+			exists := false
+			for _, data2 := range unique_group {
+				if data2.IDGroup == data.IDGroup {
+					exists = true
+					break
+				}
+			}
+			if exists == false {
+				unique_group = append(unique_group, data)
+			}
+		}
+	}
 
 	// GET AND ORDER LAST CHAT MESSAGE
 	chats_group := []ChatsTable{}
-	for _, group := range chats_table_group {
+	for _, group := range unique_group {
 		var chat_group_ ChatsTable
 		repos.DB.Where("id_group = ?", group.IDGroup).Order("chats.created_at desc").First(&chat_group_)
 		chats_group = append(chats_group, chat_group_)
