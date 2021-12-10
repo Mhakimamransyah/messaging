@@ -19,8 +19,9 @@ const (
 )
 
 var (
-	usersData users.Users
-	usersSpec users.UsersSpec
+	usersData    users.Users
+	usersSpec    users.UsersSpec
+	listUserData []*users.Users
 
 	user_repo    mocks.Repository
 	user_service users.Services
@@ -71,6 +72,21 @@ func TestRegistersNewUser(t *testing.T) {
 	})
 }
 
+func TestGetAllUser(t *testing.T) {
+	t.Run("Expects Error while reading all users data", func(t *testing.T) {
+		user_repo.On("GetAll").Return(nil, errors.New("Error")).Once()
+		res, err := user_service.GetAllUser()
+		assert.Nil(t, res)
+		assert.NotNil(t, err)
+	})
+	t.Run("Expects Success while reading all users data", func(t *testing.T) {
+		user_repo.On("GetAll").Return(listUserData, nil).Once()
+		res, err := user_service.GetAllUser()
+		assert.Nil(t, err)
+		assert.NotNil(t, res)
+	})
+}
+
 func setup() {
 	usersData = users.Users{
 		ID:       ID,
@@ -85,5 +101,6 @@ func setup() {
 		Phone:    Phone,
 	}
 
+	listUserData = append(listUserData, &usersData)
 	user_service = users.InitUserService(&user_repo)
 }

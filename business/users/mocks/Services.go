@@ -13,6 +13,29 @@ type Services struct {
 	mock.Mock
 }
 
+// GetAllUser provides a mock function with given fields:
+func (_m *Services) GetAllUser() ([]*users.Users, error) {
+	ret := _m.Called()
+
+	var r0 []*users.Users
+	if rf, ok := ret.Get(0).(func() []*users.Users); ok {
+		r0 = rf()
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*users.Users)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func() error); ok {
+		r1 = rf()
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // GetUser provides a mock function with given fields: username
 func (_m *Services) GetUser(username string) (*users.Users, error) {
 	ret := _m.Called(username)

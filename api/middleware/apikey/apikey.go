@@ -9,9 +9,9 @@ import (
 
 func ApiKey() echo.MiddlewareFunc {
 	return middleware.KeyAuthWithConfig(middleware.KeyAuthConfig{
-		KeyLookup: "header:api-key",
+		KeyLookup: "header:key",
 		Validator: func(s string, c echo.Context) (bool, error) {
-			return s == os.Getenv("SEROTONIN_KEY"), nil
+			return s == os.Getenv("MESSAGING_KEY"), nil
 		},
 	})
 }

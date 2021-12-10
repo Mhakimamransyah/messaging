@@ -68,7 +68,7 @@ func initConfig() *AppConfig {
 
 	//use this if .env file (dont forget to run "source PATH_TO/.env" example "source config/.env")
 	viper.AutomaticEnv()
-	viper.SetEnvPrefix("serotonin")
+	viper.SetEnvPrefix("messaging")
 	viper.BindEnv("app_port")
 	viper.BindEnv("db_mysql_driver")
 	viper.BindEnv("db_mysql_host")

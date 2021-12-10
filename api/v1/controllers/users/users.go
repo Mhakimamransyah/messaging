@@ -45,6 +45,14 @@ func (controller *UsersController) GetUsersByUsername(c echo.Context) error {
 	}
 }
 
+func (controller *UsersController) GetAllUsersController(c echo.Context) error {
+	res, err := controller.User_service.GetAllUser()
+	if err != nil {
+		return c.JSON(common.NewBadRequestResponseWithMessage(err.Error()))
+	}
+	return c.JSON(common.NewSuccessResponseGetData(res, "All Users Data", len(res)))
+}
+
 func (controller *UsersController) Health(c echo.Context) error {
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"Status": "Up",

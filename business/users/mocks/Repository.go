@@ -64,6 +64,29 @@ func (_m *Repository) Get(username string) (*users.Users, error) {
 	return r0, r1
 }
 
+// GetAll provides a mock function with given fields:
+func (_m *Repository) GetAll() ([]*users.Users, error) {
+	ret := _m.Called()
+
+	var r0 []*users.Users
+	if rf, ok := ret.Get(0).(func() []*users.Users); ok {
+		r0 = rf()
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*users.Users)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func() error); ok {
+		r1 = rf()
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // GetUserById provides a mock function with given fields: id_user
 func (_m *Repository) GetUserById(id_user int) (*users.Users, error) {
 	ret := _m.Called(id_user)

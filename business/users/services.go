@@ -22,6 +22,14 @@ type UsersSpec struct {
 	Phone    string `form:"phone" json:"phone" validate:"max=20"`
 }
 
+func (service *UserService) GetAllUser() ([]*Users, error) {
+	res, err := service.User_repo.GetAll()
+	if err != nil {
+		return nil, business.ErrInternalServerError
+	}
+	return res, nil
+}
+
 func (service *UserService) RegistersNewUser(users *UsersSpec) error {
 	err := validator.GetValidator().Struct(users)
 	if err != nil {

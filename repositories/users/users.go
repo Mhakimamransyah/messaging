@@ -96,6 +96,20 @@ func (repo *UsersRepository) GetUserById(id_user int) (*users.Users, error) {
 	return ConvertUserTablesToUsers(&user_table), nil
 }
 
+func (repo *UsersRepository) GetAll() ([]*users.Users, error) {
+	user_table := []UsersTable{}
+	err := repo.DB.Find(&user_table).Error
+	if err != nil {
+		return nil, err
+	}
+
+	users := []*users.Users{}
+	for _, data := range user_table {
+		users = append(users, ConvertUserTablesToUsers(&data))
+	}
+	return users, nil
+}
+
 func (repo *UsersRepository) Update(user *users.Users) error {
 	return nil
 }
