@@ -11,6 +11,8 @@ jobs:
      runs-on: ubuntu-18.04
      steps:
      - uses: actions/checkout@v2
+       with:
+         fetch-depth: 0 
      - name: setup-golang
        uses: actions/setup-go@v2
        with:
@@ -21,7 +23,7 @@ jobs:
        run: go test ./... -coverprofile outfile .
      - name: build output coverage file
        run: go tool cover -html=outfile -o cover.html
-     - name: Sonar Cloud
+     - name: Sonar Cloud Scan
        uses: sonarsource/sonarcloud-github-action@master
        env:
         GITHUB_TOKEN: ${{ secrets.TOKEN }}
