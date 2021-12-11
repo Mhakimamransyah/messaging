@@ -12,7 +12,7 @@ Api service to serve messaging feature. This service running in [Here](http://10
 - MySql
 ## Images
 ```md
-docker pull messaging:1.0
+docker pull mhakim/messaging:1.0
 ```
 ## Sonar Cloud
 Check [Source code analysis](https://sonarcloud.io/project/overview?id=mhakimamransyah)
